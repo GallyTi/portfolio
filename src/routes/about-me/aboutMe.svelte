@@ -16,9 +16,9 @@
 <div class="aboutMeWrapper">
   <div class="innerWrapper">
     <nav class="view-selector">
-      <a href="#" class:active={aboutVersion === 'classic'} on:click|preventDefault={() => setAboutVersion('classic')}>Classic View</a>
+      <a href="" class:active={aboutVersion === 'classic'} on:click|preventDefault={() => setAboutVersion('classic')}>Classic View</a>
       <span class="separator"></span>
-      <a href="#" class:active={aboutVersion === 'chatbot'} on:click|preventDefault={() => setAboutVersion('chatbot')}>Chatbot View</a>
+      <a href="" class:active={aboutVersion === 'chatbot'} on:click|preventDefault={() => setAboutVersion('chatbot')}>Chatbot View</a>
     </nav>
     {#if aboutVersion === 'classic'}
       <ClassicAbout />
@@ -85,7 +85,7 @@
   padding: 20px; /* Spacing inside the div */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Adds a subtle shadow */
   overflow: auto; /* In case the content overflows */
-  z-index: 2; /* Ensure it's above other content */
+  z-index: 5; /* Ensure it's above other content */
 }
 
 @media(max-width: 600px) {

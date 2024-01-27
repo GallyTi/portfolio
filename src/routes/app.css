@@ -1,8 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-
 :root {
     --background-rgb: 2 6 23;
     --background-light-rgb: 30 41 59;
@@ -16,10 +11,15 @@
       
     --back-width: 100vw;
     --back-height: 98vh;
-    --font-size: 0.8rem;
+    --font-size: (0.5rem, 0.5vw + 0.9vw, 1.15rem);
 
     --font-color: #fff;
     --link-color: #0000EE;
+
+    --menu-background-color: rgba(0, 0, 0, 0.65);
+    --menu-item-background-color: rgba(255, 255, 255, 0.1);
+    --menu-item-border-color: white;
+    --burger-menu-size: 2rem;
   }
 
   body {
@@ -72,12 +72,12 @@
     height: 100%;
     width: 100%;
     position: absolute;
-    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background: linear-gradient(-45deg, #aa076b, #61045f);
     background-size: 400% 400%;
     animation: gradient 15s ease infinite;
     mix-blend-mode: darken; 
     pointer-events: none;
-    z-index: 3;
+    z-index: 2;
   }
 
   .back-letters {
@@ -89,7 +89,8 @@
     height: 100%;
     width: 100%;
     color: white;
-    font-size: var(--font-size);
+    /*font-size: var(clamp(-font-size));*/
+    font-size: clamp(0.6rem, 0.7vw + 1vw, 0.9rem);
     font-weight: 500;
     word-wrap: break-word;
     opacity: 0;
@@ -101,6 +102,7 @@
       transparent
     );
     scale: 1.03;
+    z-index: 1;
   }
 
   .back:hover .back-letters {
@@ -148,6 +150,7 @@
     justify-content: flex-end;
     align-items: center;
     background-color: rgba(0, 0, 0, 0.65); /* Black with 90% opacity */
+    transition: top 0.3s;
   }
 
   ul#navBarStyle li {
@@ -174,6 +177,14 @@
       height: 2px;
       background-color: white; /* White underline */
   }
+
+  #navBarStyle .language-switch button {
+    background: none;
+    border: none;
+    color: white; /* Or any other color you prefer */
+    cursor: pointer;
+  }
+
   #menuTitleDisplay {
     position: absolute;
     left: 0; /* Align the title on the left side */
@@ -217,13 +228,101 @@
     display: block;
     border: 1px solid transparent; /* Add transparent border to maintain layout */
     transition: background-color 0.3s, border-color 0.3s; /* Smooth transition for hover effects */
-}
+  }
 
-.dropdown-content a:hover {
-    background-color: rgba(255, 255, 255, 0.1); /* Slightly lighter on hover */
-    border-color: white; /* White border on hover */
-}
+  .dropdown-content a:hover {
+      background-color: rgba(255, 255, 255, 0.1); /* Slightly lighter on hover */
+      border-color: white; /* White border on hover */
+  }
 
   .dropdown:hover .dropdown-content {
       display: block; /* Show dropdown */
+  }
+
+  /* Hamburger Menu */
+  .hamburger {
+    display: none;
+    cursor: pointer;
+    font-size: var(--burger-menu-size);
+    padding: 1rem;
+    font-weight: bold; /* Make the text bold */
+    color: white; /* Set the text color to white */
+    font-size: 1.5rem;
+    background: none; /* Removes default button background */
+    border: none; /* Removes default button border */
+    cursor: pointer;
+  }
+
+  #menuTitleDisplay {
+    display: none; /* Hide the element */
+  }
+
+  /* Mobile Navbar */
+  @media (max-width: 600px) {
+    .hamburger {
+        display: block;
+        position: absolute;
+        right: 0;
+        top: 0;
+        z-index: 6;
+        font-weight: bold; /* Make the text bold */
+        color: white; /* Set the text color to white */
+    }
+
+    #navBarStyle {
+        flex-direction: column;
+        position: fixed;
+        top: -100vh;
+        right: 0;
+        width: 60%;
+        height: 100vh;
+        background-color: var(--menu-background-color);
+        border-bottom-left-radius: 15px;
+        padding-top: 4rem; /* Height of the header */
+        align-items: start;
+        padding-left: 1rem;
+    }
+
+    ul#navBarStyle li {
+        display: block;
+        margin: 0.5rem 0;
+        width: 100%;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+    }
+
+    ul#navBarStyle li:hover,
+    ul#navBarStyle li.active {
+        background-color: var(--menu-item-background-color);
+        border-color: var(--menu-item-border-color);
+    }
+
+    .dropdown-content {
+        position: static;
+        background-color: transparent;
+        box-shadow: none;
+        width: 100%;
+        text-align: left;
+    }
+
+    .dropdown-content a {
+        padding: 0.5rem 1rem;
+    }
+
+    /* Language Switch Button */
+    .language-switch {
+        position: absolute;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        background-color: var(--menu-item-background-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1rem;
+        color: var(--menu-item-border-color);
+    }
   }
