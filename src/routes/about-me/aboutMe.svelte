@@ -2,6 +2,7 @@
   import ClassicAbout from './ClassicAbout.svelte';
   import ChatbotAbout from './ChatbotAbout.svelte';
   import "../app.css";
+	import { onDestroy, onMount } from 'svelte';
   
   let aboutVersion = 'classic'; // 'classic' or 'chatbot'
 
