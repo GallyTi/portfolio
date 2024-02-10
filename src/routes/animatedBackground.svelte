@@ -1,37 +1,38 @@
 <script>
+// @ts-nocheck
+
   import { onMount } from 'svelte';
   import "./app.css";
 
   export let inverted = false;
 
-  // @ts-ignore
+  
   let mouseInactivityTimer;
-  // @ts-ignore
   let pointGenerationInterval;
-  // @ts-ignore
   let back;
-  // @ts-ignore
   let letters;
-  // @ts-ignore
   let animationFrameId = null;
+  let ripples = []; // Ensure this is defined at the top level
+
+  let lastMousePosition = { x: null, y: null }; 
 
   const randomChar = () => chars[Math.floor(Math.random() * (chars.length - 1))],
-        // @ts-ignore
+        
         randomString = length => Array.from({length}, randomChar).join("");
 
   const chars = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
 
   onMount(() => {
     back = document.querySelector(".back");
-    // @ts-ignore
+    
     letters = back.querySelector(".back-letters");
-
-    // @ts-ignore
     back.addEventListener('mousemove', handleOnMove);
-    // @ts-ignore
     back.addEventListener('touchmove', handleOnMove);
 
-    startGeneratingRandomPoints();
+    // Delay the start of random point generation to avoid immediate load
+    setTimeout(() => {
+      startGeneratingRandomPoints();
+    }, 3000); // Start after a delay to ensure user has time to interact first
   });
 
   function startGeneratingRandomPoints() {
@@ -39,68 +40,127 @@
   }
 
   function stopGeneratingRandomPoints() {
-    // @ts-ignore
+    
     clearInterval(pointGenerationInterval);
   }
 
   function generateRandomPoints() {
-    // @ts-ignore
+    
     const rect = back.getBoundingClientRect();
     const points = [];
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 2; i++) {
       const x = Math.random() * rect.width;
       const y = Math.random() * rect.height;
       points.push({x, y});
     }
-    updateMaskForMultiplePoints(points);
+    animateRipple(points[0]);
   }
 
   function resetInactivityTimer() {
-    // @ts-ignore
+    
     clearTimeout(mouseInactivityTimer);
     mouseInactivityTimer = setTimeout(() => {
-      startGeneratingRandomPoints();
+      
+      if (ripples.length === 0) { // Ensure no ripples are active before starting
+        startGeneratingRandomPoints();
+      }
     }, 3000); // Set to 3 seconds of inactivity
   }
 
-  // @ts-ignore
-  function updateMaskForMultiplePoints(points) {
-    const circleSize = '8rem';
-    // @ts-ignore
-    const maskImage = points.map(point => {
-      return `radial-gradient(circle ${circleSize} at ${point.x}px ${point.y}px, rgba(255, 255, 255, 1) 20%, rgba(255, 255, 255, 0.25), transparent)`;
-    }).join(', ');
-
-    // @ts-ignore
-    letters.style.webkitMaskImage = maskImage;
-    // @ts-ignore
-    letters.style.opacity = '1';
+  
+  function animateRipple(point, numberOfRipples = 3, delayBetweenRipples = 500) {
+    // Ensure this function does not trigger immediately on load
+    if (point.x !== undefined && point.y !== undefined) {
+      for (let i = 0; i < numberOfRipples; i++) {
+        setTimeout(() => {
+          const ripple = {
+            point,
+            maxRadius: 200,
+            duration: 1000,
+            startTime: performance.now(),
+            currentRadius: 0
+          };
+          
+          ripples.push(ripple);
+          manageRipples();
+        }, i * delayBetweenRipples);
+      }
+    }
   }
 
-  // @ts-ignore
+  function manageRipples() {
+    const activeRipples = [];
+    ripples.forEach(ripple => {
+      const elapsedTime = performance.now() - ripple.startTime;
+      const progress = elapsedTime / ripple.duration;
+      if (progress < 1) {
+        ripple.currentRadius = progress * ripple.maxRadius;
+        activeRipples.push(ripple);
+      } else {
+        // Before the ripple is removed, ensure it's updated to the last mouse position
+        ripple.point = lastMousePosition;
+      }
+    });
+
+    ripples = activeRipples;
+    updateMaskForRipples(); // This will now use the updated position
+
+    if (ripples.length > 0) {
+      requestAnimationFrame(manageRipples);
+    }
+  }
+
+  function updateMaskForRipples() {
+    
+    const maskImages = ripples.map(ripple => {
+      const {point, currentRadius} = ripple;
+      return `radial-gradient(circle at ${point.x}px ${point.y}px, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.5) ${currentRadius * 0.8}px, transparent ${currentRadius}px)`;
+    }).join(', ');
+    
+    letters.style.webkitMaskImage = maskImages;
+  }
+
+  
   const handleOnMove = (e) => {
-    // @ts-ignore
+    
     const rect = back.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    updateMaskForMultiplePoints([{x, y}]);
+    lastMousePosition = { x, y };
 
-    stopGeneratingRandomPoints(); // Stop the point generation as the mouse moves
-    resetInactivityTimer(); // Reset the timer on every mouse move
+    updateMaskForMultiplePoints([{x, y}]); // Directly update mask on mouse move
 
-    // @ts-ignore
+    stopGeneratingRandomPoints();
+    
+    clearTimeout(mouseInactivityTimer); // Immediately clear to prevent unwanted triggers
+    resetInactivityTimer();
+
+    
     if (animationFrameId) {
       cancelAnimationFrame(animationFrameId);
     }
 
     animationFrameId = requestAnimationFrame(() => {
-      // @ts-ignore
+      
       const backArea = back.clientWidth * back.clientHeight;
       const desiredLength = backArea / 100;
-      // @ts-ignore
+      
       letters.innerText = randomString(Math.floor(desiredLength));
     });
+  };
+
+  
+  function updateMaskForMultiplePoints(points) {
+    const circleSize = '8rem';
+    
+    const maskImage = points.map(point => {
+      return `radial-gradient(circle ${circleSize} at ${point.x}px ${point.y}px, rgba(255, 255, 255, 1) 20%, rgba(255, 255, 255, 0.25), transparent)`;
+    }).join(', ');
+    
+    letters.style.webkitMaskImage = maskImage;
+    
+    letters.style.opacity = '1';
   }
 </script>
 
@@ -211,6 +271,25 @@
     100% {
       background-position: 0% 50%;
     }
+  }
+
+  @keyframes expandAndFade {
+    0% {
+      transform: scale(0.5);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 0.75;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0;
+    }
+  }
+
+  .circle-mask {
+    animation: expandAndFade 1.5s ease-out forwards;
   }
 
 </style>
