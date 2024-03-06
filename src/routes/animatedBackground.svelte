@@ -26,14 +26,30 @@
     letters.style.webkitMaskImage = 'none';
     back.addEventListener('mousemove', handleOnMove);
     back.addEventListener('touchmove', handleOnMove);
+    
+    // Listen for visibility change
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
     setTimeout(() => {
-      startGeneratingRandomPoints();
-    }, 3000);
+      if (document.visibilityState === 'visible') {
+        startGeneratingRandomPoints();
+      }
+    }, 13000);
   });
+
+  // Handle visibility change
+  function handleVisibilityChange() {
+    if (document.visibilityState === 'hidden') {
+      stopGeneratingRandomPoints();
+    } else if (document.visibilityState === 'visible') {
+      // Optionally resume generating points here if needed when the user comes back
+      // This could be based on additional conditions, like if user interaction was detected before
+    }
+  }
 
   function startGeneratingRandomPoints() {
     if (!pointGenerationInterval) {
-      pointGenerationInterval = setInterval(generateRandomPoints, 500);
+      pointGenerationInterval = setInterval(generateRandomPoints, 200);
     }
   }
 
@@ -67,10 +83,8 @@
     const baseDelayBetweenRipples = 500; // Base delay, can adjust if needed
     
     for (let i = 0; i < numberOfRipples; i++) {
-      // Randomize duration and size for each ripple
-      const duration = (Math.random() * 0.5 + 1.25) * 1000; // Random duration between 1250ms and 1750ms
-      const sizeMultiplier = Math.random() * (0.75 - 0.25) + 0.5; // Random size between 0.75x and 1.25x
-      const maxRadius = 200 * sizeMultiplier;
+      const duration = 2000 + Math.random() * 1000; // Longer, varying duration for each ripple
+      const maxRadius = 100 + Math.random() * 50; // Varying sizes for realism
 
       setTimeout(() => {
         const ripple = {
@@ -81,9 +95,7 @@
           currentRadius: 0
         };
         ripples.push(ripple);
-        if (i === 0) {
-          manageRipples(true); // Only call manageRipples for the first ripple
-        }
+        manageRipples();
       }, i * baseDelayBetweenRipples);
     }
   }
@@ -104,9 +116,6 @@
 
     if (ripples.length > 0) {
       requestAnimationFrame(manageRipples);
-    } else {
-      // Ensure mouse mask is updated even after ripples end
-      updateMaskForMultiplePoints([lastMousePosition]);
     }
   }
 
@@ -119,7 +128,7 @@
     // Generate the ripple masks
     const rippleMasks = ripples.map(ripple => {
       const {point, currentRadius} = ripple;
-      return `radial-gradient(circle at ${point.x}px ${point.y}px, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.5) ${currentRadius * 0.8}px, transparent ${currentRadius}px)`;
+      return `radial-gradient(circle at ${point.x}px ${point.y}px, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.2) ${currentRadius * 0.5}px, transparent ${currentRadius}px)`;
     }).join(', ');
 
     // Combine the mouse move mask with the ripple masks
@@ -230,13 +239,18 @@
       height: 100%;
       width: 100%;
       color: white;
-      /*font-size: var(clamp(-font-size));*/
       font-size: clamp(0.6rem, 0.7vw + 1vw, 0.9rem);
       font-weight: 500;
       word-wrap: break-word;
       opacity: 0;
       transition: opacity 400ms;
       -webkit-mask-image: radial-gradient(
+        calc(var(--back-height) * 0.25) circle at var(--x) var(--y), 
+        rgb(255 255 255) 20%, 
+        rgb(255 255 255 / 25%), 
+        transparent
+      );
+      mask-image: radial-gradient(
         calc(var(--back-height) * 0.25) circle at var(--x) var(--y), 
         rgb(255 255 255) 20%, 
         rgb(255 255 255 / 25%), 
@@ -286,10 +300,5 @@
         transform: scale(1);
         opacity: 0;
       }
-    }
-  
-    .circle-mask {
-      animation: expandAndFade 1.5s ease-out forwards;
-    }
-  
+    }  
   </style>

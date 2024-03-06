@@ -98,6 +98,7 @@
       <p class="sub-text highlight">NA STRÁNKE MÔJHO CURRICULUM VITAE</p>
     </div>
     <page />
+    <Background/>
   {:else if menu === 2}
     <Skills />
   {:else if menu === 3}
@@ -107,8 +108,6 @@
   {:else}
     <NotFound />
   {/if}
-
-  <Background/>
 </div>
 
 
@@ -175,9 +174,5 @@
     z-index: 5;
     margin-top: 3rem;
     /* Additional styling as needed */
-  }
-
-  .language-switch {
-    /* Additional styling for language switch */
   }
 </style>
